@@ -4,7 +4,7 @@
 
 project     = "challengeone"
 service     = "stock"
-environment = "homologation"
+environment = "dev"
 
 # ===============================================
 # DATABASE
@@ -19,7 +19,7 @@ db_engine_version    = "17"
 # BACKUP E MANUTENÇÃO
 # ===============================================
 
-backup_retention_period = 7
+backup_retention_period = 0  # Desabilitado para free tier dev
 backup_window          = "03:00-04:00"
 maintenance_window     = "sun:04:00-sun:05:00"
 
@@ -27,15 +27,15 @@ maintenance_window     = "sun:04:00-sun:05:00"
 # ALTA DISPONIBILIDADE
 # ===============================================
 
-multi_az              = false  # true em produção
-deletion_protection   = false  # true em produção
-skip_final_snapshot   = true   # false em produção
+multi_az              = false  # Dev não precisa de Multi-AZ
+deletion_protection   = false
+skip_final_snapshot   = true
 
 # ===============================================
 # MONITORAMENTO
 # ===============================================
 
-monitoring_interval = 60
+monitoring_interval = 0  # Desabilitado em dev para reduzir custos
 
 # ===============================================
 # TAGS
@@ -44,7 +44,7 @@ monitoring_interval = 60
 tags = {
   Project     = "ChallengeOne"
   Service     = "Stock"
-  Environment = "Homolog"
+  Environment = "Dev"
   ManagedBy   = "Terraform"
   Team        = "Platform"
 }

@@ -1,0 +1,12 @@
+.terraform
+*.tfstate
+*.tfstate.backup
+.terraform.tfstate
+.terraform.tfstate.backup
+
+# Crash log files
+crash.log   
+
+# secret
+secrets.tfvars
+secrets.tfvars.template

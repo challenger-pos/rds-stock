@@ -1,3 +1,28 @@
+terraform {
+  required_version = ">= 1.0"
+  
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
+
+provider "aws" {
+  region = "us-east-2"
+  
+  default_tags {
+    tags = {
+      Environment = var.environment
+      ManagedBy   = "Terraform"
+      Repository  = "rds-stock"
+      Project     = var.project
+      Service     = var.service
+    }
+  }
+}
+
 # ===============================================
 # REMOTE STATES
 # ===============================================
@@ -7,7 +32,7 @@ data "terraform_remote_state" "networking" {
   backend = "s3"
   config = {
     bucket = "tf-state-challenge-bucket"
-      key    = "v4/networking/homologation/terraform.tfstate"
+    key    = "v4/networking/dev/terraform.tfstate"
     region = "us-east-2"
   }
 }
@@ -17,7 +42,7 @@ data "terraform_remote_state" "kubernetes" {
   backend = "s3"
   config = {
     bucket = "tf-state-challenge-bucket"
-    key    = "v4/kubernetes/homologation/terraform.tfstate"
+    key    = "v4/kubernetes/dev/terraform.tfstate"
     region = "us-east-2"
   }
 }
