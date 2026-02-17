@@ -10,7 +10,7 @@ environment = "dev"
 # DATABASE
 # ===============================================
 
-db_name              = "stock_db"
+db_name              = "challengeone"
 db_instance_class    = "db.t3.micro"
 db_allocated_storage = 20
 db_engine_version    = "17"
