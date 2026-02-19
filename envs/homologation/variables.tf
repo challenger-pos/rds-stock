@@ -72,7 +72,7 @@ variable "db_engine_version" {
 variable "backup_retention_period" {
   description = "Período de retenção de backup em dias"
   type        = number
-  default     = 7
+  default     = 0
 }
 
 variable "backup_window" {

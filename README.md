@@ -1,149 +1,75 @@
 # RDS Stock Database
 
-Módulo Terraform para provisionar um banco de dados PostgreSQL RDS para o Stock Service com alta disponibilidade e backup automático.
+Módulo Terraform para provisionar PostgreSQL RDS para o Stock Service em 3 ambientes: dev, homologation e production.
 
-## 📋 Overview
-
-Este repositório contém:
-- **modules/rds-postgresql/**: Módulo reutilizável para RDS PostgreSQL
-- **envs/dev/**: Configuração para ambiente de desenvolvimento
-- **envs/homologation/**: Configuração para ambiente de homologação
-- **envs/production/**: Configuração para ambiente de produção
-
-## 🔧 Arquitetura
+## 📁 Estrutura
 
 ```
-VPC + Subnets Privadas
-    ↓
-RDS PostgreSQL Instance
-    ↓
-    ├─ DB Subnet Group (Multi-AZ)
-    ├─ Security Group (de EKS)
-    ├─ Parameter Group (customizado)
-    └─ Backup Automático
+rds-stock/
+├── envs/
+│   ├── dev/              # Desenvolvimento
+│   ├── homologation/     # Homologação
+│   └── production/       # Produção
+└── modules/
+    └── rds-postgresql/   # Módulo PostgreSQL reutilizável
 ```
 
-## 📊 Configuração por Ambiente
+## 📊 Ambientes
 
-| Aspecto | Dev | Homolog | Prod |
-|---------|-----|---------|------|
-| Instance Class | `db.t3.micro` | `db.t3.micro` | `db.t3.small` |
-| Storage | 20 GB | 20 GB | 100 GB |
-| Backup Retention | 0 dias | 7 dias | 30 dias |
-| Multi-AZ | ❌ | ❌ | ✅ |
-| Deletion Protection | ❌ | ❌ | ✅ |
-| Monitoring | Desabilitado | Ativo | Ativo |
+| Aspecto | Dev | Homolog | Production |
+|---------|-----|---------|------------|
+| DB Name | `stock_db` | `stock_db` | `stock_db` |
+| Instance | `db.t3.micro` | `db.t3.micro` | `db.t3.micro` |
+| Storage | 20 GB | 20 GB | 20 GB |
+| Backup | 0 dias | 0 dias | 0 dias |
+| Monitoramento | Desabilitado | Ativo | Desabilitado |
 
-## 🚀 Deployment
+## 🚀 Deploy
 
 ### Pré-requisitos
 
-1. ✅ Terraform v1.0+
-2. ✅ AWS CLI configurado
-3. ✅ Conta AWS com permissões IAM
+- Terraform v1.0+
+- AWS CLI configurado
+- VPC e EKS já provisionados
 
-### Passo 1: Preparar Credenciais
-
-```bash
-# Copiar template
-cp envs/dev/secrets.tfvars.template envs/dev/secrets.tfvars
-
-# Editar com sua senha PostgreSQL
-nano envs/dev/secrets.tfvars
-# db_password = "sua-senha-forte"
-```
-
-### Passo 2: Inicializar
+### Passos
 
 ```bash
+# 1. Entrar no diretório do ambiente
 cd envs/dev
+
+# 2. Copiar template de credenciais
+cp secrets.tfvars.template secrets.tfvars
+# Editar: db_password = "sua-senha"
+
+# 3. Inicializar
 terraform init
-```
 
-### Passo 3: Planejar
-
-```bash
-terraform plan \
-  -var-file="terraform.tfvars" \
-  -var-file="secrets.tfvars"
-```
-
-### Passo 4: Aplicar
-
-```bash
-terraform apply \
-  -var-file="terraform.tfvars" \
-  -var-file="secrets.tfvars"
+# 4. Aplicar
+terraform apply -var-file="terraform.tfvars" -var-file="secrets.tfvars"
 ```
 
 ## 📋 Variáveis
 
-### Obrigatórias (sem default)
+Apenas **2 variáveis obrigatórias** em `terraform.tfvars`:
 
 ```hcl
-environment = "dev"      # Valores: dev, homologation, production
-db_password = "..."      # Senha do banco PostgreSQL
+environment = "dev"           # ou: homologation, production
+db_password = "minha-senha"   # Sua senha PostgreSQL
 ```
 
-### Com Defaults
-
-| Variável | Default | Descrição |
-|----------|---------|-----------|
-| `project` | `challengeone` | Nome do projeto |
-| `service` | `stock` | Nome do serviço |
-| `db_name` | `challengeone` | Nome do banco (dev); `stock_db` (homolog) |
-| `db_username` | `postgres` | Usuário do banco |
-| `db_instance_class` | `db.t3.micro` | Classe da instância |
-| `db_allocated_storage` | `20` | GB de storage |
-| `db_engine_version` | `17` | Versão do PostgreSQL |
-| `backup_retention_period` | `0` (dev); `7` (homolog) | Dias de backup |
-| `backup_window` | `03:00-04:00` | Horário de backup |
-| `maintenance_window` | `sun:04:00-sun:05:00` | Janela de manutenção |
-| `multi_az` | `false` | MultiAZ (quer dizer, High Availability) |
-| `deletion_protection` | `false` | Proteção contra deleção |
-| `skip_final_snapshot` | `true` (dev); `false` (prod) | Snapshot ao deletar |
-| `monitoring_interval` | `0` (dev); `60` (homolog) | Segundos entre monitoramento |
-
-### Arquivos de Configuração
-
-**terraform.tfvars**
-```hcl
-environment = "dev"
-db_password = "postgres"
-```
-
-**secrets.tfvars** (NÃO commitar!)
-```
-# Opcional se db_username != postgres
-db_username = "custom_user"
-```
-
-## 🔄 Alterando Ambiente
-
-### Dev → Homolog
-
-```bash
-# Cria nova infraestrutura
-cd envs/homologation
-cp ~/dev/secrets.tfvars .  # Copie sua senha
-terraform init
-terraform apply \
-  -var-file="terraform.tfvars" \
-  -var-file="secrets.tfvars"
-```
-
-### Customizar Valores
-
-```bash
-# Sobrescrever defaults via CLI
-terraform apply \
-  -var-file="terraform.tfvars" \
-  -var-file="secrets.tfvars" \
-  -var="db_allocated_storage=50" \
-  -var="backup_retention_period=30"
-```
+Todas as outras têm **defaults apropriados** por ambiente:
+- `project`: `challengeone`
+- `service`: `stock`
+- `db_username`: `postgres`
+- `db_instance_class`: `db.t3.micro`
+- `db_allocated_storage`: `20` GB
+- `db_engine_version`: `17`
+- Backup e monitoramento: diferenciados por env
 
 ## 📤 Outputs
+
+Principais outputs após deploy:
 
 ```bash
 terraform output
@@ -151,163 +77,39 @@ terraform output
 
 | Output | Descrição |
 |--------|-----------|
-| `rds_endpoint` | Endpoint com porta (ex: host:5432) |
+| `rds_endpoint` | Endpoint com porta |
 | `rds_endpoint_without_port` | Apenas hostname |
-| `rds_port` | Porta (padrão: 5432) |
-| `rds_arn` | ARN do RDS |
-| `rds_id` | Identifier do RDS |
+| `rds_port` | Porta (5432) |
+| `rds_id` | Identificador do RDS |
 | `db_name` | Nome do banco |
-| `db_username` | Username (sensível) |
-| `security_group_id` | SG ID do RDS |
-| `jdbc_url` | JDBC connection string |
+| `security_group_id` | Security Group ID |
+| `jdbc_url` | URL JDBC para aplicação |
 
-## 🔐 Security
-
-### Credenciais
-
-- **Segredo**: `db_password` - Nunca commitar!
-- **Usuário**: `db_username` - Padrão: `postgres`
-- **Localização**: `secrets.tfvars` - Adicionar ao `.gitignore`
-
-### Network
-
-- **Localização**: Subnets privadas (sem acesso público)
-- **Acesso**: Apenas via Security Group do EKS
-- **Criptografia**: Habilitada (storage encrypted)
-- **Backup**: Automatizado
-
-### .gitignore
-
-```
-secrets.tfvars
-*.tfvars
-!terraform.tfvars
-!terraform.tfvars.*.example
-.terraform/
-```
-
-## 🔍 Validação
-
-### Conectar ao Banco
+## 🔄 Alternar Ambientes
 
 ```bash
-# Get endpoint from terraform output
-ENDPOINT=$(terraform output -raw rds_endpoint_without_port)
-PORT=$(terraform output -raw rds_port)
+# Dev para Homolog
+cd envs/homologation
+terraform init
+terraform apply -var-file="terraform.tfvars" -var-file="secrets.tfvars"
 
-# Conectar localmente (se tem bastion host)
-psql -h $ENDPOINT -p $PORT -U postgres -d challengeone
+# Dev para Production
+cd envs/production
+terraform init
+terraform apply -var-file="terraform.tfvars" -var-file="secrets.tfvars"
 ```
 
-### Via AWS CLI
+## 🔧 Customizar (Opcional)
+
+Sobrescrever defaults via CLI:
 
 ```bash
-aws rds describe-db-instances \
-  --db-instance-identifier challengeone-stock-db-dev \
-  --region us-east-2 \
-  --query 'DBInstances[0].{Endpoint:Endpoint,Status:DBInstanceStatus}'
+terraform apply \
+  -var-file="terraform.tfvars" \
+  -var-file="secrets.tfvars" \
+  -var="db_allocated_storage=50" \
+  -var="backup_retention_period=15"
 ```
 
-### CloudWatch Logs
-
-```bash
-# Ver logs do PostgreSQL
-aws logs tail /aws/rds/db/challengeone-stock-db-dev --follow
-```
-
-## 🆘 Troubleshooting
-
-### Pod não consegue conectar ao RDS
-
-1. **Verificar Security Group**
-   ```bash
-   aws ec2 describe-security-groups \
-     --query 'SecurityGroups[?GroupName==`challengeone-stock-rds-sg-dev`]'
-   ```
-
-2. **Verificar Endpoint**
-   ```bash
-   terraform output -raw rds_endpoint
-   ```
-
-3. **Testar conexão**
-   ```bash
-   kubectl run -it --rm debug --image=postgres:17 --restart=Never -- \
-     psql -h <endpoint> -U postgres -d challengeone
-   ```
-
-### Backup falhando
-
-```bash
-# Verificar status
-aws rds describe-db-instances \
-  --db-instance-identifier challengeone-stock-db-dev \
-  --region us-east-2 \
-  --query 'DBInstances[0].BackupRetentionPeriod'
-```
-
-### RDS muito lento
-
-```bash
-# Verificar CPU/Memory
-aws cloudwatch get-metric-statistics \
-  --namespace AWS/RDS \
-  --metric-name CPUUtilization \
-  --dimensions Name=DBInstanceIdentifier,Value=challengeone-stock-db-dev \
-  --start-time $(date -u -d '1 hour ago' +%Y-%m-%dT%H:%M:%S) \
-  --end-time $(date -u +%Y-%m-%dT%H:%M:%S) \
-  --period 300 \
-  --statistics Average
-```
-
-## 💰 Custos
-
-| Ambiente | Instance | Storage | Backup | Total/mês |
-|----------|----------|---------|--------|-----------|
-| Dev | $8.79 | ~$2 | $0 | ~$10 |
-| Homolog | $8.79 | ~$2 | ~$1-2 | ~$10-12 |
-| Prod | $17.58 | ~$10 | ~$5-10 | ~$35-40 |
-
-## 📚 Referências
-
-- [AWS RDS Documentation](https://docs.aws.amazon.com/rds/)
-- [Terraform AWS Provider](https://registry.terraform.io/providers/hashicorp/aws/latest/docs)
-- [PostgreSQL Documentation](https://www.postgresql.org/docs/)
-
-## ✅ Checklist de Deploy
-
-- [ ] Arquivo `secrets.tfvars` criado e preenchido
-- [ ] `terraform.tfvars` com ambiente correto
-- [ ] `terraform plan` sem erros
-- [ ] Backup retention apropriado per ambiente
-- [ ] Security Group ID correto (do EKS)
-- [ ] Endpoint RDS nos outputs
-- [ ] Aplicação consegue conectar ao banco
-- [ ] Logs sem erro de conexão
-
-## 🔄 CI/CD Integration
-
-### GitHub Actions
-
-```yaml
-deploy-rds:
-  runs-on: ubuntu-latest
-  steps:
-    - uses: actions/checkout@v3
-    - uses: hashicorp/setup-terraform@v2
-    
-    - name: Terraform Init
-      working-directory: rds-stock/envs/dev
-      run: terraform init
-    
-    - name: Terraform Apply
-      working-directory: rds-stock/envs/dev
-      env:
-        TF_VAR_db_password: ${{ secrets.RDS_DB_PASSWORD }}
-      run: terraform apply -auto-approve -var-file="terraform.tfvars"
-```
-
----
-
-**Mantido por:** Platform Engineering  
-**Última atualização:** 2026-02-19
+--- 
+**Última atualização**: 2026-02-19

@@ -27,7 +27,7 @@ variable "environment" {
 variable "db_name" {
   description = "Nome do banco de dados"
   type        = string
-  default     = "challengeone"
+  default     = "stock_db"
 }
 
 variable "db_username" {
