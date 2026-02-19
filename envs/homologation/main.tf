@@ -7,7 +7,7 @@ data "terraform_remote_state" "networking" {
   backend = "s3"
   config = {
     bucket = "tf-state-challenge-bucket"
-      key    = "v4/networking/homologation/terraform.tfstate"
+    key    = "v4/networking/${var.environment}/terraform.tfstate"
     region = "us-east-2"
   }
 }
@@ -17,7 +17,7 @@ data "terraform_remote_state" "kubernetes" {
   backend = "s3"
   config = {
     bucket = "tf-state-challenge-bucket"
-    key    = "v4/kubernetes/homologation/terraform.tfstate"
+    key    = "v4/kubernetes/${var.environment}/terraform.tfstate"
     region = "us-east-2"
   }
 }

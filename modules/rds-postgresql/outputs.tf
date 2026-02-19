@@ -43,16 +43,6 @@ output "security_group_id" {
   value       = aws_security_group.rds.id
 }
 
-output "secrets_manager_arn" {
-  description = "ARN do secret"
-  value       = aws_secretsmanager_secret.rds_credentials.arn
-}
-
-output "secrets_manager_name" {
-  description = "Nome do secret"
-  value       = aws_secretsmanager_secret.rds_credentials.name
-}
-
 output "jdbc_url" {
   description = "JDBC URL"
   value       = "jdbc:postgresql://${aws_db_instance.this.endpoint}/${var.db_name}"

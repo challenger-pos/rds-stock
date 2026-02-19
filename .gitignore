@@ -8,5 +8,6 @@
 crash.log   
 
 # secret
+terraform.tfvars
 secrets.tfvars
 secrets.tfvars.template

@@ -5,16 +5,19 @@
 variable "project" {
   description = "Nome do projeto"
   type        = string
+  default     = "challengeone"
 }
 
 variable "service" {
   description = "Nome do serviço"
   type        = string
+  default     = "stock"
 }
 
 variable "environment" {
   description = "Ambiente (dev, homolog, production)"
   type        = string
+  # Sem default - deve ser fornecido via tfvars ou CLI
 }
 
 # ===============================================
@@ -24,12 +27,14 @@ variable "environment" {
 variable "db_name" {
   description = "Nome do banco de dados"
   type        = string
+  default     = "stock_db"
 }
 
 variable "db_username" {
   description = "Username do banco de dados"
   type        = string
   sensitive   = true
+  default     = "postgres"
 }
 
 variable "db_password" {
@@ -121,5 +126,11 @@ variable "monitoring_interval" {
 variable "tags" {
   description = "Tags para os recursos"
   type        = map(string)
-  default     = {}
+  default     = {
+    Project     = "ChallengeOne"
+    Service     = "Stock"
+    Environment = "Homolog"
+    ManagedBy   = "Terraform"
+    Team        = "Platform"
+  }
 }

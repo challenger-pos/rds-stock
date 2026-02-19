@@ -43,16 +43,6 @@ output "security_group_id" {
   value       = module.rds_postgresql.security_group_id
 }
 
-output "secrets_manager_arn" {
-  description = "ARN do secret no AWS Secrets Manager"
-  value       = module.rds_postgresql.secrets_manager_arn
-}
-
-output "secrets_manager_name" {
-  description = "Nome do secret no AWS Secrets Manager"
-  value       = module.rds_postgresql.secrets_manager_name
-}
-
 output "jdbc_url" {
   description = "JDBC URL completa"
   value       = module.rds_postgresql.jdbc_url
