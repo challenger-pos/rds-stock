@@ -1,5 +1,9 @@
 # RDS Stock Database
 
+## 🎯 Objetivo
+
+Criar e provisionar a base de dados PostgreSQL para o serviço de estoque, fornecendo infraestrutura de banco de dados gerenciada via AWS RDS em múltiplos ambientes (desenvolvimento, homologação e produção).
+
 Módulo Terraform para provisionar PostgreSQL RDS para o Stock Service em 3 ambientes: dev, homologation e production.
 
 ## 📁 Estrutura
@@ -22,7 +26,30 @@ rds-stock/
 | Instance | `db.t3.micro` | `db.t3.micro` | `db.t3.micro` |
 | Storage | 20 GB | 20 GB | 20 GB |
 | Backup | 0 dias | 0 dias | 0 dias |
-| Monitoramento | Desabilitado | Ativo | Desabilitado |
+
+## 🔄 CI/CD Automático
+
+O projeto possui pipeline CI/CD configurado via GitHub Actions em `.github/workflows/ci-deploy-rds.yml`:
+
+**Trigger**: Push para branches `main` e `homologation`
+
+**Mapeamento de ambientes**:
+- `main` → `production`
+- `homologation` → `homologation`
+
+**Secrets necessários no GitHub**:
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
+- `DB_PASSWORD`
+
+**Etapas do pipeline**:
+1. Checkout do código
+2. Configuração de credenciais AWS
+3. Setup Terraform v1.9.7
+4. `terraform init` com backend remoto
+5. `terraform plan` (validação)
+6. `terraform apply` (deploy automático)
+7. Export dos outputs
 
 ## 🚀 Deploy
 
