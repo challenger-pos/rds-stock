@@ -17,6 +17,7 @@ variable "service" {
 variable "environment" {
   description = "Ambiente (dev, homolog, production)"
   type        = string
+  default     = "production"
   # Sem default - deve ser fornecido via tfvars ou CLI
 }
 
